@@ -1,3 +1,10 @@
+when:
+  event:
+    - push
+
+  branch:
+    - main
+
 steps:
   deploy:
     image: docker:27-cli
@@ -7,9 +14,4 @@ steps:
 
     commands:
       - docker compose up -d --build --remove-orphans
-
-when:
-  event:
-    - push
-  branch:
-    - main
+      - docker image prune -f
