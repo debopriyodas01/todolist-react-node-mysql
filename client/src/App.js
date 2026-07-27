@@ -24,7 +24,7 @@ function App() {
     handleCharactersError(todo);
 
     try {
-      await axios.post('https://todo-mysql-backend.herokuapp.com/create', {
+      await axios.post('/api/create', {
         todo,
       });
     } catch (err) {
@@ -35,7 +35,7 @@ function App() {
   const getAllTodos = async () => {
     try {
       await axios
-        .get('https://todo-mysql-backend.herokuapp.com/')
+        .get('/api/')
         .then((response) => {
           setTodoList(response.data);
         });
@@ -49,7 +49,7 @@ function App() {
 
     try {
       await axios
-        .put(`https://todo-mysql-backend.herokuapp.com/update/${id}`, {
+        .put(`/api/update/${id}`, {
           id,
           todo: newTodo,
         })
@@ -69,7 +69,7 @@ function App() {
   const deleteTodo = async (id) => {
     try {
       await axios
-        .delete(`https://todo-mysql-backend.herokuapp.com/${id}`)
+        .delete(`/api/${id}`)
         .then((response) => {
           setTodoList(todoList.filter((val) => val.id !== id));
         });
