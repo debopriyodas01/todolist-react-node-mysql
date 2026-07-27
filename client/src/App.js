@@ -6,6 +6,9 @@ import TodoForm from './components/TodoForm';
 import TodoList from './components/TodoList';
 
 function App() {
+  
+  console.log("APP VERSION 123");
+  
   const [todo, setTodo] = useState('');
   const [todoList, setTodoList] = useState([]);
   const [newTodo, setNewTodo] = useState('');
