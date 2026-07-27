@@ -8,6 +8,7 @@ import TodoList from './components/TodoList';
 function App() {
   
   console.log("APP VERSION 123");
+  console.log(todoList);
   
   const [todo, setTodo] = useState('');
   const [todoList, setTodoList] = useState([]);
@@ -48,44 +49,38 @@ function App() {
   };
 
   const updateTodo = async (id) => {
-    handleCharactersError(newTodo);
+  handleCharactersError(newTodo);
 
-    try {
-      await axios
-        .put(`/api/update/${id}`, {
-          id,
-          todo: newTodo,
-        })
-        .then((response) => {
-          console.log(response.data);
-          setTodoList(
-            todoList.map((val) =>
-              val.id === id ? {id: val.id, todo: val.todo} : val
-            )
-          );
-        });
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
+  try {
+    await axios.put(`/api/update/${id}`, {
+      id,
+      todo: newTodo,
+    });
+
+    await getAllTodos();
+  } catch (err) {
+    console.error(err.message);
+  }
+};
 
   const deleteTodo = async (id) => {
-    try {
-      await axios
-        .delete(`/api/${id}`)
-        .then((response) => {
-          setTodoList(todoList.filter((val) => val.id !== id));
-        });
-    } catch (err) {
-      console.error(err.message);
-    }
-  };
+  try {
+    await axios.delete(`/api/${id}`);
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    addTodo();
-    setTodo('');
-  };
+    await getAllTodos();
+  } catch (err) {
+    console.error(err.message);
+  }
+};
+
+  const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  await addTodo();
+  await getAllTodos();
+
+  setTodo('');
+};
 
   useEffect(() => {
     getAllTodos();
