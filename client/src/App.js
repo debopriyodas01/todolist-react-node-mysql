@@ -86,7 +86,7 @@ function App() {
 
   useEffect(() => {
     getAllTodos();
-  }, [todoList]);
+}, []);
 
   return (
     <div className='App'>
