@@ -1,8 +1,6 @@
 services:
   mysql:
     image: mysql:8.4
-    container_name: todo-mysql
-
     restart: unless-stopped
 
     environment:
@@ -12,14 +10,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
 
     volumes:
-      - ./mysql:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
 
   backend:
     build:
-      context: .
-      dockerfile: server.Dockerfile
-
-    container_name: todo-backend
+      context: ./server
 
     restart: unless-stopped
 
@@ -34,10 +29,7 @@ services:
 
   frontend:
     build:
-      context: .
-      dockerfile: client.Dockerfile
-
-    container_name: todo-frontend
+      context: ./client
 
     restart: unless-stopped
 
@@ -46,3 +38,6 @@ services:
 
     ports:
       - "3000:80"
+
+volumes:
+  mysql_data:
