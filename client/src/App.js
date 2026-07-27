@@ -91,6 +91,8 @@ function App() {
     getAllTodos();
 }, []);
 
+  console.log(todoList);
+
   return (
     <div className='App'>
       <Layout>
