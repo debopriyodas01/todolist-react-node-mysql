@@ -1,0 +1,28 @@
+steps:
+
+  deploy:
+
+    image: alpine:3.20
+
+    volumes:
+      - /srv/apps:/srv/apps
+      - /var/run/docker.sock:/var/run/docker.sock
+
+    commands:
+
+      - apk add --no-cache git docker-cli docker-cli-compose
+
+      - |
+        if [ ! -d /srv/apps/todo/.git ]; then
+          git clone https://github.com/YOUR_USERNAME/todolist-react-node-mysql.git /srv/apps/todo
+        fi
+
+      - cd /srv/apps/todo
+
+      - git fetch origin
+
+      - git reset --hard origin/main
+
+      - docker compose up -d --build --remove-orphans
+
+      - docker image prune -f
