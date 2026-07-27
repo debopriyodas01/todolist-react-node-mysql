@@ -1,4 +1,0 @@
-CREATE TABLE IF NOT EXISTS todos (
-    id CHAR(36) PRIMARY KEY,
-    todo VARCHAR(255) NOT NULL
-);
