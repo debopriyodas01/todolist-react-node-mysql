@@ -3,10 +3,8 @@ const { pool } = require('../utils/db');
 
 class TodoRecord {
   constructor(obj) {
-    // 1. Safeguard against empty row contexts or invalid objects
     const inputTodo = obj && obj.todo ? String(obj.todo) : '';
 
-    // 2. Fallback gracefully instead of throwing a validation error on list loops
     if (!inputTodo || inputTodo.length < 3 || inputTodo.length > 50) {
       this.todo = "Malformed Todo Record";
     } else {
@@ -16,18 +14,18 @@ class TodoRecord {
     this.id = obj && obj.id ? obj.id : null;
   }
 
-  // Fetch all existing database todo entities
+  // Fetch all items from the table safely
   static async listAll() {
     try {
       const [results] = await pool.execute('SELECT * FROM `todos`');
       return results.map((obj) => new TodoRecord(obj));
     } catch (err) {
-      console.error("Database error in listAll:", err);
-      return [];
+      console.error("CRITICAL: Database error in listAll:", err);
+      throw err; // Forwards to Express error handler safely
     }
   }
 
-  // Pass the zero-index element array item cleanly to the constructor initialization loop
+  // Pure positional placeholder mapping (?) instead of conflicting named loops
   static async getOne(id) {
     try {
       const [results] = await pool.execute(
@@ -36,12 +34,12 @@ class TodoRecord {
       );
       return results.length === 0 ? null : new TodoRecord(results[0]);
     } catch (err) {
-      console.error("Database error in getOne:", err);
-      return null;
+      console.error("CRITICAL: Database error in getOne:", err);
+      throw err;
     }
   }
 
-  // Insert raw tasks directly into the master MySQL container space
+  // Secure write transactions
   async insert() {
     if (!this.id) {
       this.id = uuid();
@@ -55,7 +53,7 @@ class TodoRecord {
     return this.id;
   }
 
-  // FIXED PARAMETERS: Swapped order to match your router's parameters (id first, then todo text)
+  // Straight positional values mapping
   async update(id, todo) {
     await pool.execute(
       'UPDATE `todos` SET `todo` = ? WHERE `id` = ?', 
@@ -63,7 +61,7 @@ class TodoRecord {
     );
   }
 
-  // Clear rows cleanly out of the tracking systems
+  // Clear rows cleanly
   async delete() {
     await pool.execute(
       'DELETE FROM `todos` WHERE `id` = ?', 
