@@ -9,25 +9,22 @@ job "todo-fullstack" {
     healthy_deadline = "3m"
   }
 
-  # ONE UNIFIED GROUP: Shares the exact same network loopback interface
+  # ONE UNIFIED GROUP: Forces tasks to share a blazing-fast local network loopback
   group "application-stack" {
     count = 1
 
     network {
-      # Exposes the backend port locally
       port "backend_port" { 
         static = 8080
         to     = 8080 
       }
-      
-      # Exposes your public React frontend site on port 3000
       port "frontend_port" {
         static = 3000
         to     = 80
       }
     }
 
-    # TASK 1: The Express Backend App
+    # TASK 1: The Express Backend App Engine
     task "backend" {
       driver = "docker"
 
