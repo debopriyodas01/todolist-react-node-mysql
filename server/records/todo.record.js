@@ -18,17 +18,27 @@ class TodoRecord {
 
   // Fetch all existing database todo entities
   static async listAll() {
-    const [results] = await pool.execute('SELECT * FROM `todos`');
-    return results.map((obj) => new TodoRecord(obj));
+    try {
+      const [results] = await pool.execute('SELECT * FROM `todos`');
+      return results.map((obj) => new TodoRecord(obj));
+    } catch (err) {
+      console.error("Database error in listAll:", err);
+      return [];
+    }
   }
 
-  // FIXED: Pass the zero-index element array item cleanly to the constructor initialization loop
+  // Pass the zero-index element array item cleanly to the constructor initialization loop
   static async getOne(id) {
-    const [results] = await pool.execute(
-      'SELECT * FROM `todos` WHERE `id` = ?',
-      [id]
-    );
-    return results.length === 0 ? null : new TodoRecord(results[0]);
+    try {
+      const [results] = await pool.execute(
+        'SELECT * FROM `todos` WHERE `id` = ?',
+        [id]
+      );
+      return results.length === 0 ? null : new TodoRecord(results[0]);
+    } catch (err) {
+      console.error("Database error in getOne:", err);
+      return null;
+    }
   }
 
   // Insert raw tasks directly into the master MySQL container space
@@ -45,7 +55,7 @@ class TodoRecord {
     return this.id;
   }
 
-  // Commit text alterations back to the persistent table engine
+  // FIXED PARAMETERS: Swapped order to match your router's parameters (id first, then todo text)
   async update(id, todo) {
     await pool.execute(
       'UPDATE `todos` SET `todo` = ? WHERE `id` = ?', 
