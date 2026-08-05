@@ -12,7 +12,6 @@ function App() {
 
   console.log("APP VERSION 123");
 
-  // FIXED: Safe functional guard that halts execution cleanly without crashing the UI
   const isInvalidTodo = (value) => {
     if (!value || value.trim().length < 3 || value.trim().length > 50) {
       alert('Todo must have at least 3 characters and less than 50 characters.');
@@ -25,7 +24,7 @@ function App() {
     if (isInvalidTodo(todo)) return;
 
     try {
-      await axios.post('/api/create', { todo });
+      await axios.post('/create', { todo });
     } catch (err) {
       console.error("Inbound task addition failure:", err.message);
     }
@@ -33,8 +32,8 @@ function App() {
 
   const getAllTodos = async () => {
     try {
-      const response = await axios.get('/api/');
-      // Guard against non-array structures safely
+      const response = await axios.get('/');
+
       if (response.data && Array.isArray(response.data)) {
         setTodoList(response.data);
       } else {
@@ -49,12 +48,13 @@ function App() {
     if (isInvalidTodo(newTodo)) return;
 
     try {
-      await axios.put(`/api/update/${id}`, {
+      await axios.put(`/update/${id}`, {
         id,
         todo: newTodo,
       });
+
       await getAllTodos();
-      setNewTodo(''); // Reset the modifier buffer data target
+      setNewTodo('');
     } catch (err) {
       console.error("Inbound update execution error:", err.message);
     }
@@ -62,7 +62,7 @@ function App() {
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`/api/${id}`);
+      await axios.delete(`/${id}`);
       await getAllTodos();
     } catch (err) {
       console.error("Inbound deletion processing trace error:", err.message);
@@ -85,7 +85,12 @@ function App() {
   return (
     <div className='App'>
       <Layout>
-        <TodoForm handleSubmit={handleSubmit} setTodo={setTodo} todo={todo} />
+        <TodoForm 
+          handleSubmit={handleSubmit} 
+          setTodo={setTodo} 
+          todo={todo} 
+        />
+
         <TodoList
           todoList={todoList}
           setNewTodo={setNewTodo}
@@ -98,3 +103,4 @@ function App() {
 }
 
 export default App;
+```
