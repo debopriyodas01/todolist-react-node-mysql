@@ -1,5 +1,8 @@
 node_modules
-build
 .git
-.woodpecker
+.gitignore
+Dockerfile
 README.md
+.env
+build
+npm-debug.log
