@@ -5,12 +5,38 @@ when:
     - main
 
 steps:
-  deploy:
-    image: docker:27-cli
-
+  # 1. Build and compile the Node/Express backend service container
+  build-backend:
+    image: docker:28-cli
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-
     commands:
-      - docker compose up -d --build --remove-orphans
+      - docker build -t todo-backend:${CI_COMMIT_SHA:0:7} ./server
+
+  # 2. Build and compile the static production React frontend container
+  build-frontend:
+    image: docker:28-cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
+      - docker build -t todo-frontend:${CI_COMMIT_SHA:0:7} ./client
+
+  # 3. Hand both application service tags over to your native Nomad coordinator
+  deploy-to-nomad:
+    image: ubuntu:noble
+    volumes:
+      - /usr/bin/nomad:/usr/bin/nomad
+    commands:
+      # Inject the unique Git Commit hash tags into the orchestration template
+      - sed -i "s|BACKEND_IMAGE_PLACEHOLDER|todo-backend:${CI_COMMIT_SHA:0:7}|g" fullstack.nomad
+      - sed -i "s|FRONTEND_IMAGE_PLACEHOLDER|todo-frontend:${CI_COMMIT_SHA:0:7}|g" fullstack.nomad
+      # Execute the update on your local Nomad instance
+      - nomad job run -address=http://192.168.1.69:4646 fullstack.nomad
+
+  # 4. Clean up dangling intermediate layers to keep your server VM space clean
+  cleanup:
+    image: docker:28-cli
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    commands:
       - docker image prune -f
