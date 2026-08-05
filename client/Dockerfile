@@ -1,23 +1,27 @@
 # client/Dockerfile
+
 FROM node:22-alpine AS build
 
 WORKDIR /app
 
-# 1. Copy ONLY dependency manifest definitions first
+# Copy dependency files first for Docker cache
 COPY package*.json ./
 
-# 2. This step is now cached natively. It will only re-run if package.json changes!
-RUN npm install
+# Faster and deterministic install
+RUN npm ci
 
-# 3. Copy the remaining source files AFTER dependencies are installed
+# Copy source
 COPY . .
 
+# Build React app
 RUN npm run build
 
-# --- STAGE 2: PRODUCTION WEBSERVER ---
+
+# --- Production stage ---
 FROM nginx:alpine
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 COPY --from=build /app/build /usr/share/nginx/html
 
 EXPOSE 80
