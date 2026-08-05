@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Layout from './components/Layout';
@@ -6,87 +6,81 @@ import TodoForm from './components/TodoForm';
 import TodoList from './components/TodoList';
 
 function App() {
-  
-  console.log("APP VERSION 123");
-  console.log(todoList);
-  
   const [todo, setTodo] = useState('');
   const [todoList, setTodoList] = useState([]);
   const [newTodo, setNewTodo] = useState('');
 
-  const handleCharactersError = (value) => {
-    if (value.length < 3 || value.length > 50) {
-      throw new Error(
-        alert(
-          'Todo must have at least 3 characters and less than 50 characters.'
-        )
-      );
+  console.log("APP VERSION 123");
+
+  // FIXED: Safe functional guard that halts execution cleanly without crashing the UI
+  const isInvalidTodo = (value) => {
+    if (!value || value.trim().length < 3 || value.trim().length > 50) {
+      alert('Todo must have at least 3 characters and less than 50 characters.');
+      return true;
     }
+    return false;
   };
 
   const addTodo = async () => {
-    handleCharactersError(todo);
+    if (isInvalidTodo(todo)) return;
 
     try {
-      await axios.post('/api/create', {
-        todo,
-      });
+      await axios.post('/api/create', { todo });
     } catch (err) {
-      console.error(err.message);
+      console.error("Inbound task addition failure:", err.message);
     }
   };
 
   const getAllTodos = async () => {
     try {
-      await axios
-        .get('/api/')
-        .then((response) => {
-          setTodoList(response.data);
-        });
+      const response = await axios.get('/api/');
+      // Guard against non-array structures safely
+      if (response.data && Array.isArray(response.data)) {
+        setTodoList(response.data);
+      } else {
+        setTodoList([]);
+      }
     } catch (err) {
-      console.error(err.message);
+      console.error("Data refresh mapping execution error:", err.message);
     }
   };
 
   const updateTodo = async (id) => {
-  handleCharactersError(newTodo);
+    if (isInvalidTodo(newTodo)) return;
 
-  try {
-    await axios.put(`/api/update/${id}`, {
-      id,
-      todo: newTodo,
-    });
-
-    await getAllTodos();
-  } catch (err) {
-    console.error(err.message);
-  }
-};
+    try {
+      await axios.put(`/api/update/${id}`, {
+        id,
+        todo: newTodo,
+      });
+      await getAllTodos();
+      setNewTodo(''); // Reset the modifier buffer data target
+    } catch (err) {
+      console.error("Inbound update execution error:", err.message);
+    }
+  };
 
   const deleteTodo = async (id) => {
-  try {
-    await axios.delete(`/api/${id}`);
-
-    await getAllTodos();
-  } catch (err) {
-    console.error(err.message);
-  }
-};
+    try {
+      await axios.delete(`/api/${id}`);
+      await getAllTodos();
+    } catch (err) {
+      console.error("Inbound deletion processing trace error:", err.message);
+    }
+  };
 
   const handleSubmit = async (event) => {
-  event.preventDefault();
-
-  await addTodo();
-  await getAllTodos();
-
-  setTodo('');
-};
+    event.preventDefault();
+    await addTodo();
+    await getAllTodos();
+    setTodo('');
+  };
 
   useEffect(() => {
     getAllTodos();
-}, []);
+  }, []);
 
-  console.log(todoList);
+  console.log("Current active todo records pool:", todoList);
 
   return (
     <div className='App'>
