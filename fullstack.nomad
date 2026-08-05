@@ -1,3 +1,4 @@
+# fullstack.nomad
 job "todo-fullstack" {
   datacenters = ["dc1"]
   type        = "service"
@@ -8,21 +9,25 @@ job "todo-fullstack" {
     healthy_deadline = "3m"
   }
 
+  # ONE UNIFIED GROUP: Shares the exact same network loopback interface
   group "application-stack" {
     count = 1
 
     network {
-      # Exposes the Express backend internally on port 8080
-      port "backend_port" { to = 8080 }
+      # Exposes the backend port locally
+      port "backend_port" { 
+        static = 8080
+        to     = 8080 
+      }
       
-      # Exposes the React frontend publicly on host port 3000
+      # Exposes your public React frontend site on port 3000
       port "frontend_port" {
         static = 3000
         to     = 80
       }
     }
 
-    # TASK 1: The Express Backend App Engine
+    # TASK 1: The Express Backend App
     task "backend" {
       driver = "docker"
 
@@ -34,8 +39,7 @@ job "todo-fullstack" {
 
       env {
         PORT        = "8080"
-        # 172.17.0.1 points straight to your Master MySQL container on the host bridge
-        DB_HOST     = "172.17.0.1"
+        DB_HOST     = "172.17.0.1" # Connects back to your Master MySQL container
         DB_PORT     = "3306"
         DB_USER     = "todo"
         DB_PASSWORD = "todo123"
