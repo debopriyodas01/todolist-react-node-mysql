@@ -24,7 +24,7 @@ function App() {
     if (isInvalidTodo(todo)) return;
 
     try {
-      await axios.post('/create', { todo });
+      await axios.post('/api/create', { todo });
     } catch (err) {
       console.error("Inbound task addition failure:", err.message);
     }
@@ -32,7 +32,7 @@ function App() {
 
   const getAllTodos = async () => {
     try {
-      const response = await axios.get('/');
+      const response = await axios.get('/api/');
 
       if (response.data && Array.isArray(response.data)) {
         setTodoList(response.data);
@@ -48,7 +48,7 @@ function App() {
     if (isInvalidTodo(newTodo)) return;
 
     try {
-      await axios.put(`/update/${id}`, {
+      await axios.put(`/api/update/${id}`, {
         id,
         todo: newTodo,
       });
@@ -62,17 +62,19 @@ function App() {
 
   const deleteTodo = async (id) => {
     try {
-      await axios.delete(`/${id}`);
+      await axios.delete(`/api/${id}`);
       await getAllTodos();
     } catch (err) {
-      console.error("Inbound deletion processing trace error:", err.message);
+      console.error("Inbound deletion processing error:", err.message);
     }
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     await addTodo();
     await getAllTodos();
+
     setTodo('');
   };
 
@@ -83,12 +85,12 @@ function App() {
   console.log("Current active todo records pool:", todoList);
 
   return (
-    <div className='App'>
+    <div className="App">
       <Layout>
-        <TodoForm 
-          handleSubmit={handleSubmit} 
-          setTodo={setTodo} 
-          todo={todo} 
+        <TodoForm
+          handleSubmit={handleSubmit}
+          setTodo={setTodo}
+          todo={todo}
         />
 
         <TodoList
